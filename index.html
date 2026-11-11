@@ -1,0 +1,219 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JARVIS AI</title>
+
+<style>
+body {
+  margin: 0;
+  background: #020817;
+  color: #00d9ff;
+  font-family: Arial, sans-serif;
+  text-align: center;
+}
+
+.container {
+  padding: 25px 15px;
+}
+
+h1 {
+  font-size: 38px;
+  text-shadow: 0 0 20px #00d9ff;
+}
+
+#clock {
+  color: white;
+  font-size: 22px;
+  margin: 20px;
+}
+
+.core {
+  width: 210px;
+  height: 210px;
+  border: 5px solid #00d9ff;
+  border-radius: 50%;
+  margin: 35px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 30px #00d9ff;
+  animation: glow 2s infinite alternate;
+}
+
+.core span {
+  font-size: 30px;
+  font-weight: bold;
+}
+
+@keyframes glow {
+  from { box-shadow: 0 0 10px #00d9ff; }
+  to { box-shadow: 0 0 40px #00d9ff; }
+}
+
+button {
+  background: #003b60;
+  color: #00eaff;
+  border: 1px solid #00d9ff;
+  border-radius: 12px;
+  padding: 14px 22px;
+  font-size: 17px;
+  margin: 8px;
+}
+
+input {
+  width: 65%;
+  padding: 13px;
+  border-radius: 10px;
+  background: #101d30;
+  color: white;
+  border: 1px solid #00d9ff;
+}
+
+#response {
+  margin: 25px auto;
+  color: white;
+  line-height: 1.6;
+  max-width: 400px;
+  overflow-wrap: anywhere;
+}
+
+.wave {
+  display: inline-block;
+  width: 5px;
+  height: 20px;
+  margin: 3px;
+  background: #00d9ff;
+  animation: wave 0.6s infinite alternate;
+}
+
+.wave:nth-child(2) { animation-delay: .2s; }
+.wave:nth-child(3) { animation-delay: .4s; }
+.wave:nth-child(4) { animation-delay: .1s; }
+
+@keyframes wave {
+  to { height: 45px; }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<h1>J.A.R.V.I.S.</h1>
+<p>JUST A RATHER VERY INTELLIGENT SYSTEM</p>
+
+<div id="clock">00:00:00</div>
+
+<div class="core">
+<span>JARVIS</span>
+</div>
+
+<h3 id="status">SYSTEM ONLINE</h3>
+
+<div>
+  <span class="wave"></span>
+  <span class="wave"></span>
+  <span class="wave"></span>
+  <span class="wave"></span>
+</div>
+
+<br>
+
+<button onclick="startListening()">🎙️ SPEAK</button>
+
+<p id="message">Hello! I am JARVIS. How can I help?</p>
+
+<div>
+<input id="userInput" placeholder="Type your command...">
+<button onclick="sendMessage()">SEND</button>
+</div>
+
+<div id="response"></div>
+
+</div>
+
+<script>
+function updateClock() {
+  document.getElementById("clock").textContent =
+    new Date().toLocaleTimeString();
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+function reply(text) {
+  document.getElementById("response").textContent = text;
+
+  if ("speechSynthesis" in window) {
+    speechSynthesis.cancel();
+    let speech = new SpeechSynthesisUtterance(text);
+    speech.lang = "en-IN";
+    speechSynthesis.speak(speech);
+  }
+}
+
+function sendMessage() {
+  let input = document.getElementById("userInput");
+  let command = input.value.trim().toLowerCase();
+
+  if (!command) return;
+
+  document.getElementById("message").textContent =
+    "You: " + input.value;
+
+  if (command.includes("hello")) {
+    reply("Hello! I am JARVIS. Nice to meet you.");
+  } else if (command.includes("your name")) {
+    reply("I am JARVIS, your personal assistant.");
+  } else if (command.includes("time")) {
+    reply("The time is " + new Date().toLocaleTimeString());
+  } else if (command.includes("date")) {
+    reply("Today is " + new Date().toDateString());
+  } else if (command.includes("how are you")) {
+    reply("All systems are running perfectly.");
+  } else {
+    reply("Sorry, I don't know that command yet.");
+  }
+
+  input.value = "";
+}
+
+function startListening() {
+  const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+  if (!SpeechRecognition) {
+    reply("Voice recognition is not supported in this browser.");
+    return;
+  }
+
+  const recognition = new SpeechRecognition();
+  recognition.lang = "en-IN";
+
+  document.getElementById("status").textContent =
+    "LISTENING...";
+
+  recognition.onresult = function(event) {
+    document.getElementById("userInput").value =
+      event.results[0][0].transcript;
+    sendMessage();
+  };
+
+  recognition.onerror = function() {
+    document.getElementById("status").textContent =
+      "VOICE ERROR";
+  };
+
+  recognition.onend = function() {
+    document.getElementById("status").textContent =
+      "SYSTEM ONLINE";
+  };
+
+  recognition.start();
+}
+</script>
+</body>
+</html>
